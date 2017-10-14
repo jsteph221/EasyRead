@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/add_exchange"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="elapse.easyread.AddExchangeActivity">
+    <ProgressBar
+        android:id="@+id/add_exchange_progress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/appbar_padding_top"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            app:layout_scrollFlags="scroll|enterAlways"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:title="Add Exchange">
+
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
+    <EditText
+        android:id="@+id/search_input"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/editText3"
+        android:hint="Title,Author,Keywords,isbn"
+        android:textSize="18sp"
+        android:layout_toStartOf="@+id/search_button"
+        android:maxLines="1"/>
+
+    <ImageButton
+        android:id="@+id/search_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@android:drawable/ic_search_category_default"
+        android:layout_below="@+id/editText3"
+        android:layout_toStartOf="@+id/scan_button" />
+
+    <ImageButton
+        android:id="@+id/scan_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        app:srcCompat="@android:drawable/ic_menu_info_details"
+        android:layout_alignTop="@+id/search_button"
+        android:layout_alignEnd="@+id/add_exchange_title" />
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/add_exchange_image"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:srcCompat="@drawable/no_image_available"
+        android:layout_below="@+id/editText4"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:id="@+id/add_exchange_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Title"
+        android:layout_below="@+id/editText4"
+        android:layout_toEndOf="@+id/add_exchange_image"
+        android:maxLines="1"/>
+
+    <EditText
+        android:id="@+id/add_exchange_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:hint="Author"
+        android:maxLines="1"
+        android:layout_alignBottom="@+id/add_exchange_image"
+        android:layout_toEndOf="@+id/add_exchange_image" />
+    <fragment
+        android:id="@+id/place_autocomplete_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true" />
+
+
+    <Button
+        android:id="@+id/add_exchange_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="17dp"
+        android:text="Add Exchange" />
+
+    <TextView
+        android:id="@+id/editText3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/appbar"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Search or Scan Book"
+        android:textAllCaps="true"
+        android:textSize="18sp"
+        android:textStyle="bold|italic" />
+
+    <TextView
+        android:id="@+id/editText4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="Manual Input"
+        android:textAllCaps="true"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:layout_below="@+id/search_input"
+        android:layout_alignParentStart="true" />
+
+
+    <EditText
+        android:id="@+id/add_exchange_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="44dp"
+        android:ems="10"
+        android:hint="Description, Notes,Condition etc"
+        android:inputType="textPersonName"
+        android:maxLines="10"
+        android:textSize="14sp"
+        android:scrollbars="vertical"
+        android:layout_below="@+id/place_autocomplete_fragment"
+        android:layout_alignParentStart="true" />
+
+    AIzaSyBbp17sgkDLI4Gm8U8HjkDbq8zBVqY-HHk
+</RelativeLayout>

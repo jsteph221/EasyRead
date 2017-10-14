@@ -1,0 +1,61 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    android:orientation="horizontal">
+
+    <com.android.volley.toolbox.NetworkImageView
+        android:id="@+id/list_book_image"
+        android:layout_width="50dp"
+        android:layout_height="75dp"
+        app:srcCompat="@drawable/no_image_available"
+        android:clickable="false"
+        android:focusable="false"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/list_go"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/list_book_title"
+        android:layout_gravity="center|end"
+        app:srcCompat="@android:drawable/ic_media_play" />
+
+    <TextView
+        android:id="@+id/list_book_title"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/list_book_image"
+        android:text="Book Title Here"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/list_book_author"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_below="@+id/list_book_title"
+        android:layout_toEndOf="@+id/list_book_image"
+        android:text="Author Here" />
+
+    <TextView
+        android:id="@+id/list_poster_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/list_book_author"
+        android:layout_toEndOf="@+id/list_book_image"
+        android:text="Poster Here"
+        android:textSize="10sp" />
+
+
+</RelativeLayout>
