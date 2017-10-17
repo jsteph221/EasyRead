@@ -4,7 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="5dp"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:longClickable="true"
+    android:clickable="true">
 
     <com.android.volley.toolbox.NetworkImageView
         android:id="@+id/list_book_image"
@@ -37,7 +39,6 @@
         android:layout_height="25dp"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/list_book_image"
-        android:text="Book Title Here"
         android:textStyle="bold" />
 
     <TextView
@@ -46,7 +47,7 @@
         android:layout_height="25dp"
         android:layout_below="@+id/list_book_title"
         android:layout_toEndOf="@+id/list_book_image"
-        android:text="Author Here" />
+         />
 
     <TextView
         android:id="@+id/list_poster_name"
@@ -54,8 +55,17 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/list_book_author"
         android:layout_toEndOf="@+id/list_book_image"
-        android:text="Poster Here"
-        android:textSize="10sp" />
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/list_exchange_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/list_book_image"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/list_go"
+        android:ems="10"
+        />
 
 
 </RelativeLayout>

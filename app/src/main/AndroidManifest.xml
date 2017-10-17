@@ -29,10 +29,12 @@
         <activity
             android:name=".AddExchangeActivity"
             android:label="@string/title_activity_add_exhange"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity"
+            />
         <activity
             android:name=".LoginActivity"
-            android:label="@string/title_activity_login" />
+            android:label="Main Activity" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBbp17sgkDLI4Gm8U8HjkDbq8zBVqY-HHk"/>

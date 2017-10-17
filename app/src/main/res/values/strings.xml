@@ -11,6 +11,7 @@
        <string name="title_activity_login2">Sign in</string>
 
     <string name="add_exch_required_field">This Field is Required</string>
+    <string name = "api_error">Error contacting server. Try again later.</string>
 
 
 </resources>

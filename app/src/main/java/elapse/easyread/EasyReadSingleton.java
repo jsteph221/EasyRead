@@ -17,12 +17,13 @@ public class EasyReadSingleton {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mCtx;
-    private String userId = "";
+    private String userId = "admin";
 
     private static EasyReadSingleton INSTANCE ;
 
     private EasyReadSingleton(Context context) {
         mCtx = context;
+        mRequestQueue = Volley.newRequestQueue(context);
         mImageLoader = new ImageLoader(mRequestQueue,
                 new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap>

@@ -1,7 +1,9 @@
 package elapse.easyread;
 
-import android.os.Bundle;
+import android.content.DialogInterface;
 import android.support.v4.app.Fragment;
+import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,18 +26,15 @@ import java.util.ArrayList;
 import static android.content.ContentValues.TAG;
 
 /**
- * Created by Joshua on 2017-10-07.
+ * Created by Joshua on 10/14/2017.
  */
 
-
-
-public class ExchangesFragment extends Fragment {
+public class MyExchangesFragment extends Fragment {
     private ArrayList<BookExchange> exchanges;
-    private int maxDistance = 25000; //Make choice;
-    public ExchangesFragment(){}
+    public MyExchangesFragment(){}
 
-    public static ExchangesFragment newInstance(int sectionNum){
-        ExchangesFragment fragment = new ExchangesFragment();
+    public static MyExchangesFragment newInstance(int sectionNum){
+        MyExchangesFragment fragment = new MyExchangesFragment();
         Bundle args = new Bundle();
         args.putInt("section_number",sectionNum);
         fragment.setArguments(args);
@@ -44,20 +43,18 @@ public class ExchangesFragment extends Fragment {
 
 
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.search_exchange_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.my_exchange_fragment, container, false);
         getExchanges();
         // Inflate the layout for this fragment
         return rootView;
     }
 
     private void getExchanges(){
-        String reqUrl = Config.API + "exchanges";
-        String longitude = "49.3";
-        String latitude = "-122.84";
-        reqUrl += "/?longitude="+longitude+"&latitude="+latitude+"&maxDistance="+maxDistance;
+        String reqUrl = Config.API + "users/"+EasyReadSingleton.getInstance(getContext()).getUserId()+"/exchanges";
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, reqUrl, null, new Response.Listener<JSONObject>() {
                     @Override
@@ -69,24 +66,54 @@ public class ExchangesFragment extends Fragment {
 
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Toast.makeText(getContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(),"Error contacting server",Toast.LENGTH_LONG).show();
 
                     }
                 });
         EasyReadSingleton.getInstance(this.getContext()).addToRequestQueue(req);
     }
 
-    private void setupListView(){
-        ListView listView = (ListView) getView().findViewById(R.id.exchanges_list);
-        ListViewAdapter adapter = new ListViewAdapter(this.getContext(),R.id.list_book_title,exchanges);
+    private void setupListView() {
+        ListView listView = (ListView) getView().findViewById(R.id.my_exchanges_list);
+        ListViewAdapter adapter = new ListViewAdapter(this.getContext(), R.id.list_book_title, exchanges);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                Log.d("Exhanges","Exchange Clicked");
+                Log.d("Exhanges", "Exchange Clicked");
                 //Intent i = new Intent(this,ShowExchange.class);
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            //TODO
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Choose Action").setItems(R.array.dialog_choose_action_myexchanges, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which){
+                            case 0:
+                                //sendRemoveExchangeToServer(
+                                Log.d("Dialog","delete exchange");
+                                break;
+                            case 1:
+                                //edit
+                                break;
+                            default:
+                                break;
+                        }
+
+                    }
+                }).setNegativeButton("cancel", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface d, int arg1) {
+                        d.cancel();
+                    };
+                });
+                return true;
             }
         });
     }
@@ -105,6 +132,5 @@ public class ExchangesFragment extends Fragment {
         }
         return exchs;
     }
-
-
 }
+

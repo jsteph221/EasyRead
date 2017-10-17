@@ -2,6 +2,7 @@ package elapse.easyread;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,6 +22,12 @@ public class Book implements Parcelable {
         this.title=title;
         this.author = author;
         this.imageUrl = imageUrl;
+    }
+
+    public Book(JSONObject book){
+        this.title = book.optString("title");
+        this.author = book.optString("author");
+        this.imageUrl = book.optString("imageUrl");
     }
 
 

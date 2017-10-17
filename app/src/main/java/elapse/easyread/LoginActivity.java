@@ -60,11 +60,18 @@ public class LoginActivity extends AppCompatActivity{
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        Button mSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
+            }
+        });
+        Button mCreateAccountButton = (Button) findViewById(R.id.create_account_button);
+        mCreateAccountButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createAccount();
             }
         });
 
@@ -85,7 +92,7 @@ public class LoginActivity extends AppCompatActivity{
         boolean cancel = false;
         View focusView = null;
 
-        if (!TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError("Field is required");
             focusView = mPasswordView;
             cancel = true;
@@ -102,38 +109,39 @@ public class LoginActivity extends AppCompatActivity{
             showProgress(true);
             JSONObject body = new JSONObject();
             try{
-                body.put("username",username);
+                body.put("_id",username);
                 body.put("password",password);
             }catch (JSONException e){
                 Log.d(TAG,e.toString());
             }
-            JsonObjectRequest req = new JsonObjectRequest(GET, Config.API+"users/login",body, new Response.Listener<JSONObject>() {
+            JsonObjectRequest req = new JsonObjectRequest(POST, Config.API+"users/login",body, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    try{
-                        String status = response.getString("status");
-                        if (status.equals("200")){
-                            EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
-                            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(i);
-                        }else if(response.equals("404")){
-                            mUsernameView.setError("Username does not exist.");
-                            mUsernameView.requestFocus();
-                        }else{
-                            mPasswordView.setError("Incorrect Password");
-                            mPasswordView.requestFocus();
-                        }
-                    }catch(JSONException e){
-                        Log.d(TAG,e.getMessage());
-                    }
+                    EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     showProgress(false);
+                    startActivity(i);
                 }
             }, new Response.ErrorListener() {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG,error.toString());
-                    Toast.makeText(getApplicationContext(),"Server down. Try again later",Toast.LENGTH_LONG).show();
+                    if(error.networkResponse == null){
+                        Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                    }else{
+                        if(error.networkResponse.statusCode == 403){
+                            mPasswordView.setError("Incorrect Password");
+                            mPasswordView.requestFocus();
+                        }else if(error.networkResponse.statusCode == 404){
+                            mUsernameView.setError("Username does not exist.");
+                            mUsernameView.requestFocus();
+                        }else{
+                            Log.d(TAG,error.toString());
+                            Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                        }
+                    }
+
+                    showProgress(false);
                 }
             });
             EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
@@ -142,18 +150,16 @@ public class LoginActivity extends AppCompatActivity{
 
 
     private void createAccount(){
-        // Reset errors.
         mUsernameView.setError(null);
         mPasswordView.setError(null);
 
-        // Store values at the time of the login attempt.
         final String username = mUsernameView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
         View focusView = null;
 
-        if (!TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             mPasswordView.setError("Field is required");
             focusView = mPasswordView;
             cancel = true;
@@ -170,7 +176,7 @@ public class LoginActivity extends AppCompatActivity{
             showProgress(true);
             JSONObject body = new JSONObject();
             try{
-                body.put("username",username);
+                body.put("_id",username);
                 body.put("password",password);
             }catch (JSONException e){
                 Log.d(TAG,e.toString());
@@ -178,31 +184,22 @@ public class LoginActivity extends AppCompatActivity{
             JsonObjectRequest req = new JsonObjectRequest(POST, Config.API+"users",body, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
-                    try{
-                        String status = response.getString("status");
-                        if (status.equals("401")){
-                            mUsernameView.setError("Username already in use");
-                            mUsernameView.requestFocus();
-                            EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
-                        }else if(response.equals("500")){
-                            Toast.makeText(getApplicationContext(),"Error with database. Try again later.",Toast.LENGTH_LONG).show();
-                        }else{
-                            Toast.makeText(getApplicationContext(),"Account created. Logging in.",Toast.LENGTH_LONG).show();
-                            EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
-                            Intent i = new Intent(getApplicationContext(), MainActivity.class);
-                            startActivity(i);
-                        }
-                    }catch(JSONException e){
-                        Log.d(TAG,e.getMessage());
-                    }
-                    showProgress(false);
+                    Toast.makeText(getApplicationContext(),"Account created. Logging in.",Toast.LENGTH_LONG).show();
+                    EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
+                    Intent i = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(i);
                 }
             }, new Response.ErrorListener() {
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.d(TAG,error.toString());
-                    Toast.makeText(getApplicationContext(),"Server down. Try again later",Toast.LENGTH_LONG).show();
+                    if(error.networkResponse.statusCode == 403){
+                        mUsernameView.setError("Username already in use");
+                        mUsernameView.requestFocus();
+                    }else{
+                        Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                    }
+                    showProgress(false);
                 }
             });
             EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
@@ -213,9 +210,6 @@ public class LoginActivity extends AppCompatActivity{
         return name.length()>=5;
     }
 
-    private boolean isPasswordValid(String password) {
-        return password.length() > 4;
-    }
 
     /**
      * Shows the progress UI and hides the login form.

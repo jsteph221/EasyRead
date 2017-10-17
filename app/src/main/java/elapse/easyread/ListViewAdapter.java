@@ -34,20 +34,24 @@ public class ListViewAdapter extends ArrayAdapter {
         if (exch != null) {
             TextView bookTitleText = (TextView) v.findViewById(R.id.list_book_title);
             TextView bookAuthorText = (TextView) v.findViewById(R.id.list_book_author);
-            TextView posterNameText = (TextView) v.findViewById(R.id.poster_name);
+            TextView posterNameText = (TextView) v.findViewById(R.id.list_poster_name);
             NetworkImageView bookPicture = (NetworkImageView) v.findViewById(R.id.list_book_image);
+            TextView exchangeDate = (TextView) v.findViewById(R.id.list_exchange_date);
 
             if (bookTitleText != null) {
                 bookTitleText.setText(exchanges.get(position).getBook().getTitle());
             }
             if (bookAuthorText != null) {
-                bookAuthorText.setText(exchanges.get(position).getBook().getAuthor());
+                bookAuthorText.setText("Author : "+ exchanges.get(position).getBook().getAuthor());
             }
             if (posterNameText != null) {
-                posterNameText.setText(exchanges.get(position).getPoster());
+                posterNameText.setText("Poster : " + exchanges.get(position).getPosterId());
             }
             if (bookPicture != null) {
                 bookPicture.setImageUrl(exchanges.get(position).getBook().getImageUrl(),EasyReadSingleton.getInstance(this.getContext()).getImageLoader());
+            }
+            if(exchangeDate != null){
+                exchangeDate.setText(exchanges.get(position).getDate());
             }
         }
 

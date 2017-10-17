@@ -1,5 +1,6 @@
 package elapse.easyread;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -39,21 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
-        setupTabs(mViewPager);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
-    }
-
-    private void setupTabs(ViewPager viewPager){
-        SectionsPagerAdapter adapter = new SectionsPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new ExchangesFragment(),"Exchanges");
     }
 
 
@@ -65,7 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.bar_add_button){
+            Intent i = new Intent(MainActivity.this, AddExchangeActivity.class);
+            startActivity(i);
 
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -79,6 +70,11 @@ public class MainActivity extends AppCompatActivity {
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+            mFragmentList.add(new ExchangesFragment());
+            mFragmentTitleList.add("All Exchanges");
+            mFragmentList.add(new MyExchangesFragment());
+            mFragmentTitleList.add("My Exchanges");
+
         }
 
         @Override

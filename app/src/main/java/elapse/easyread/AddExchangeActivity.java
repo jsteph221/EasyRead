@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.DialogFragment;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,10 +50,10 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
     private NetworkImageView mImageView;
     private EditText mDescriptionView;
     private ProgressBar mProgressBar;
+    PlaceAutocompleteFragment mAutocompleteFragment;
 
     private String currentImgURL;
     private Place chosenPlace;
-    PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
 
 
@@ -59,14 +61,16 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setContentView(R.layout.activity_add_exhange);
         mSearchInputView = (EditText) findViewById(R.id.search_input);
         mTitleView = (EditText) findViewById(R.id.add_exchange_title);
         mAuthorView = (EditText) findViewById(R.id.add_exchange_author);
         mImageView = (NetworkImageView) findViewById(R.id.add_exchange_image);
         mDescriptionView = (EditText) findViewById(R.id.add_exchange_description);
         mProgressBar = (ProgressBar) findViewById(R.id.add_exchange_progress);
+        mAutocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
 
-        setContentView(R.layout.activity_add_exhange);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(toolbar != null) {
             setSupportActionBar(toolbar);
@@ -75,9 +79,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
 
         EditText desc = (EditText) findViewById(R.id.add_exchange_description);
         desc.setMovementMethod(new ScrollingMovementMethod());
-
-        PlaceAutocompleteFragment autocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
-        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
                 chosenPlace = place;
@@ -86,7 +88,6 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
 
             @Override
             public void onError(Status status) {
-                // TODO: Handle the error.
                 Toast.makeText(getApplicationContext(),"Error getting place data",Toast.LENGTH_LONG).show();
                 Log.i(TAG, "An error occurred: " + status);
             }
@@ -101,7 +102,19 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+        menu.findItem(R.id.bar_add_button).setVisible(false);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -164,7 +177,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         scanButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v){
-                //TODO: Scan click
+                Log.d(TAG,"Onclick scan");
             }
         });
 
@@ -172,12 +185,11 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         addButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
-                showProgress(true);
                 boolean cancel = false;
                 View focusView = null;
 
                 String title = mTitleView.getText().toString();
-                String author = mTitleView.getText().toString();
+                String author = mAuthorView.getText().toString();
                 String imgUrl = currentImgURL;
                 String description = mDescriptionView.getText().toString();
                 Place place = chosenPlace;
@@ -190,9 +202,16 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
                     cancel = true;
                     focusView = mTitleView;
                 }
+                else if (chosenPlace == null){
+                    Toast.makeText(getApplicationContext(),"Location required to add exchange",Toast.LENGTH_SHORT).show();
+                    cancel = true;
+                }
                 if (cancel){
-                    focusView.requestFocus();
+                    if(focusView !=null){
+                        focusView.requestFocus();
+                    }
                 }else{
+                    showProgress(true);
                     Book b = new Book(title,author,imgUrl);
                     if(TextUtils.isEmpty(description)){
                         description = "";
@@ -212,26 +231,17 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         JsonObjectRequest req = new JsonObjectRequest(POST, reqUrl,body, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
-                try{
-                    String status = response.getString("status");
-                    if (status.equals("500")){
-                        Log.d(TAG, "sendExchangeToServer: "+response.getString("message"));
-                        Toast.makeText(getApplicationContext(),"Error with Server.Try again later",Toast.LENGTH_LONG).show();
-                    }else{
-                        Toast.makeText(getApplicationContext(),response.getString("message"),Toast.LENGTH_LONG).show();
-                        resetViews();
-                    }
-                }catch(JSONException e){
-                    Log.d(TAG,e.getMessage());
-                }
+                Toast.makeText(getApplicationContext(),"Added Exchange",Toast.LENGTH_LONG).show();
+                resetViews();
                 showProgress(false);
             }
         }, new Response.ErrorListener() {
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.d(TAG,error.toString());
-                Toast.makeText(getApplicationContext(),"Server down. Try again later",Toast.LENGTH_LONG).show();
+                Log.d(TAG,error.getMessage());
+                Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                showProgress(false);
             }
         });
         EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
