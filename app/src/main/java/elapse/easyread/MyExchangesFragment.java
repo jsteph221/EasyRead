@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -23,14 +24,15 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Created by Joshua on 10/14/2017.
  */
 
 public class MyExchangesFragment extends Fragment {
     private ArrayList<BookExchange> exchanges;
+    private View mView;
+
+    private boolean refreshOnResume= false;
     public MyExchangesFragment(){}
 
     public static MyExchangesFragment newInstance(int sectionNum){
@@ -47,13 +49,15 @@ public class MyExchangesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.my_exchange_fragment, container, false);
+        mView = inflater.inflate(R.layout.fragment_my_exchanges, container, false);
         getExchanges();
-        // Inflate the layout for this fragment
-        return rootView;
+        return mView;
     }
 
+
     private void getExchanges(){
+        showProgress(true);
+
         String reqUrl = Config.API + "users/"+EasyReadSingleton.getInstance(getContext()).getUserId()+"/exchanges";
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, reqUrl, null, new Response.Listener<JSONObject>() {
@@ -74,7 +78,7 @@ public class MyExchangesFragment extends Fragment {
     }
 
     private void setupListView() {
-        ListView listView = (ListView) getView().findViewById(R.id.my_exchanges_list);
+        ListView listView = (ListView) mView.findViewById(R.id.my_exchanges_list);
         ListViewAdapter adapter = new ListViewAdapter(this.getContext(), R.id.list_book_title, exchanges);
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -83,7 +87,7 @@ public class MyExchangesFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
                 Log.d("Exhanges", "Exchange Clicked");
-                //Intent i = new Intent(this,ShowExchange.class);
+                //TODO:Intent i = new Intent(this,ShowExchange.class);
             }
         });
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
@@ -113,9 +117,15 @@ public class MyExchangesFragment extends Fragment {
                         d.cancel();
                     };
                 });
+                builder.show();
                 return true;
             }
         });
+        showProgress(false);
+    }
+    private void showProgress(boolean bool){
+        ProgressBar bar = (ProgressBar) mView.findViewById(R.id.my_exchange_progress);
+        bar.setVisibility(bool ? View.VISIBLE : View.GONE);
     }
 
     private ArrayList<BookExchange> parseJsonResponse(JSONObject response){
@@ -131,6 +141,20 @@ public class MyExchangesFragment extends Fragment {
 
         }
         return exchs;
+}
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Check should we need to refresh the fragment
+        if(refreshOnResume){
+            getExchanges();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        refreshOnResume = true;
     }
 }
 

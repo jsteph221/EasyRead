@@ -1,6 +1,9 @@
 package elapse.easyread;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
+
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,8 +24,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 /**
  * Created by Joshua on 2017-10-07.
  */
@@ -31,7 +32,7 @@ import static android.content.ContentValues.TAG;
 
 public class ExchangesFragment extends Fragment {
     private ArrayList<BookExchange> exchanges;
-    private int maxDistance = 25000; //Make choice;
+    private int maxDistance = 25000; //TODO:Make choice;
     public ExchangesFragment(){}
 
     public static ExchangesFragment newInstance(int sectionNum){
@@ -47,7 +48,7 @@ public class ExchangesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.search_exchange_fragment, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_search_exchanges, container, false);
         getExchanges();
         // Inflate the layout for this fragment
         return rootView;
@@ -55,9 +56,10 @@ public class ExchangesFragment extends Fragment {
 
     private void getExchanges(){
         String reqUrl = Config.API + "exchanges";
+        //TODO:Dynamic location
         String longitude = "49.3";
         String latitude = "-122.84";
-        reqUrl += "/?longitude="+longitude+"&latitude="+latitude+"&maxDistance="+maxDistance;
+        reqUrl += "/?longitude="+longitude+"&latitude="+latitude+"&maxDistance="+maxDistance+"&username="+EasyReadSingleton.getInstance(getActivity()).getUserId();
         JsonObjectRequest req = new JsonObjectRequest
                 (Request.Method.GET, reqUrl, null, new Response.Listener<JSONObject>() {
                     @Override
@@ -80,15 +82,6 @@ public class ExchangesFragment extends Fragment {
         ListView listView = (ListView) getView().findViewById(R.id.exchanges_list);
         ListViewAdapter adapter = new ListViewAdapter(this.getContext(),R.id.list_book_title,exchanges);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view,
-                                    int position, long id) {
-                Log.d("Exhanges","Exchange Clicked");
-                //Intent i = new Intent(this,ShowExchange.class);
-            }
-        });
     }
 
     private ArrayList<BookExchange> parseJsonResponse(JSONObject response){

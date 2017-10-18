@@ -1,6 +1,8 @@
 package elapse.easyread;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -52,12 +54,27 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.bar_add_button){
-            Intent i = new Intent(MainActivity.this, AddExchangeActivity.class);
-            startActivity(i);
+        switch (item.getItemId()){
+            case R.id.bar_search_preferences:
+                SearchPreferencesDialog dialog = new SearchPreferencesDialog();
+                dialog.show(getFragmentManager(),"SearchPrefDialog");
+                return true;
+            case R.id.bar_add_button:
+                Intent i = new Intent(MainActivity.this, AddExchangeActivity.class);
+                startActivity(i);
+                return true;
+            case R.id.bar_logout:
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preferences_file_key),Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.remove("logged_user").commit();
+                Intent i2 = new Intent(getApplicationContext(),LoginActivity.class);
+                startActivity(i2);
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
 
         }
-        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -74,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
             mFragmentTitleList.add("All Exchanges");
             mFragmentList.add(new MyExchangesFragment());
             mFragmentTitleList.add("My Exchanges");
-
         }
 
         @Override
@@ -85,12 +101,6 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fr,String title){
-            mFragmentList.add(fr);
-            mFragmentTitleList.add(title);
-
         }
 
         @Override

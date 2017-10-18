@@ -71,7 +71,7 @@
                 android:layout_alignBottom="@+id/add_exchange_image"
                 android:layout_toEndOf="@+id/add_exchange_image" />
             <fragment
-                android:id="@+id/place_autocomplete_fragment"
+                android:id="@+id/pref_dialog_place_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:name="com.google.android.gms.location.places.ui.PlaceAutocompleteFragment"
@@ -140,7 +140,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_below="@+id/place_autocomplete_fragment"
+                android:layout_below="@+id/pref_dialog_place_auto"
                 android:layout_marginTop="14dp"
                 android:ems="10"
                 android:inputType="textPersonName"

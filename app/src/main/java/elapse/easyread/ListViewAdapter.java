@@ -1,10 +1,12 @@
 package elapse.easyread;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.NetworkImageView;
@@ -17,10 +19,12 @@ import java.util.ArrayList;
 
 public class ListViewAdapter extends ArrayAdapter {
     private ArrayList<BookExchange> exchanges;
+    private Context ctx;
 
     public ListViewAdapter(Context context, int textViewResourceId, ArrayList<BookExchange> items) {
         super(context, textViewResourceId, items);
         this.exchanges = items;
+        this.ctx = context;
     }
 
     @Override
@@ -37,6 +41,7 @@ public class ListViewAdapter extends ArrayAdapter {
             TextView posterNameText = (TextView) v.findViewById(R.id.list_poster_name);
             NetworkImageView bookPicture = (NetworkImageView) v.findViewById(R.id.list_book_image);
             TextView exchangeDate = (TextView) v.findViewById(R.id.list_exchange_date);
+            ImageButton goButton = (ImageButton) v.findViewById(R.id.list_go);
 
             if (bookTitleText != null) {
                 bookTitleText.setText(exchanges.get(position).getBook().getTitle());
@@ -53,6 +58,15 @@ public class ListViewAdapter extends ArrayAdapter {
             if(exchangeDate != null){
                 exchangeDate.setText(exchanges.get(position).getDate());
             }
+            final int pos = position;
+            goButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent i = new Intent(ctx,ShowExchangeActivity.class);
+                    i.putExtra("book_exchange",exchanges.get(pos));
+                    ctx.startActivity(i);
+                }
+            });
         }
 
         return v;

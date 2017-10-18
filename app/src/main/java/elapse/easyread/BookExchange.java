@@ -1,5 +1,7 @@
 package elapse.easyread;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -14,7 +16,7 @@ import java.util.ArrayList;
  * Created by Joshua on 2017-10-07.
  */
 
-public class BookExchange {
+public class BookExchange implements Parcelable {
     private String posterId;
     private Book book;
     private String locationName;
@@ -28,7 +30,6 @@ public class BookExchange {
         this.locationName = locName;
         this.latLng = latLng;
         this.description = desc;
-
     }
 
     public BookExchange(JSONObject exchange){
@@ -44,6 +45,15 @@ public class BookExchange {
             Log.d("Error: ",e.getMessage());
         }
     }
+
+    public BookExchange(Parcel  source){
+        posterId = source.readString();
+        book = source.readParcelable(Book.class.getClassLoader());
+        locationName = source.readString();
+        latLng = source.readParcelable(LatLng.class.getClassLoader());
+        description = source.readString();
+        date = source.readString();
+}
 
     public String getPosterId(){
         return posterId;
@@ -75,4 +85,30 @@ public class BookExchange {
 
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(posterId);
+        dest.writeParcelable(book,0);
+        dest.writeString(locationName);
+        dest.writeParcelable(latLng,0);
+        dest.writeString(description);
+        dest.writeString(date);
+    }
+
+    public static final Creator<BookExchange> CREATOR = new Creator<BookExchange>() {
+        @Override
+        public BookExchange[] newArray(int size) {
+            return new BookExchange[size];
+        }
+
+        @Override
+        public BookExchange createFromParcel(Parcel source) {
+            return new BookExchange(source);
+        }
+    };
 }

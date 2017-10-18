@@ -3,7 +3,9 @@ package elapse.easyread;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -44,39 +46,49 @@ public class LoginActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
-        // Set up the login form.
-        mUsernameView = (EditText) findViewById(R.id.username);
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preferences_file_key),Context.MODE_PRIVATE);
+        String user = sharedPref.getString("logged_user",null);
 
-        mPasswordView = (EditText) findViewById(R.id.password);
-        mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
-                if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
-                    return true;
+        if(user !=null){
+            EasyReadSingleton.getInstance(getApplicationContext()).setUserId(user);
+            Intent i = new Intent(getApplicationContext(),MainActivity.class);
+            startActivity(i);
+        }else{
+            setContentView(R.layout.activity_login);
+            // Set up the login form.
+            mUsernameView = (EditText) findViewById(R.id.username);
+
+            mPasswordView = (EditText) findViewById(R.id.password);
+            mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                @Override
+                public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                    if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                        attemptLogin();
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
 
-        Button mSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mSignInButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                attemptLogin();
-            }
-        });
-        Button mCreateAccountButton = (Button) findViewById(R.id.create_account_button);
-        mCreateAccountButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createAccount();
-            }
-        });
+            Button mSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+            mSignInButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    attemptLogin();
+                }
+            });
+            Button mCreateAccountButton = (Button) findViewById(R.id.create_account_button);
+            mCreateAccountButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    createAccount();
+                }
+            });
 
-        mLoginFormView = findViewById(R.id.login_form);
-        mProgressView = findViewById(R.id.login_progress);
+            mLoginFormView = findViewById(R.id.login_form);
+            mProgressView = findViewById(R.id.login_progress);
+
+        }
     }
 
     private void attemptLogin() {
@@ -118,6 +130,11 @@ public class LoginActivity extends AppCompatActivity{
                 @Override
                 public void onResponse(JSONObject response) {
                     EasyReadSingleton.getInstance(getApplicationContext()).setUserId(username);
+                    SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preferences_file_key),Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString("logged_user",username);
+                    editor.commit();
+
                     Intent i = new Intent(getApplicationContext(), MainActivity.class);
                     showProgress(false);
                     startActivity(i);

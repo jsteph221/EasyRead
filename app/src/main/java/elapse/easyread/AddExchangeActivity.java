@@ -4,7 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -12,14 +14,18 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -69,7 +75,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         mImageView = (NetworkImageView) findViewById(R.id.add_exchange_image);
         mDescriptionView = (EditText) findViewById(R.id.add_exchange_description);
         mProgressBar = (ProgressBar) findViewById(R.id.add_exchange_progress);
-        mAutocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.place_autocomplete_fragment);
+        mAutocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.pref_dialog_place_auto);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(toolbar != null) {
@@ -103,6 +109,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
         menu.findItem(R.id.bar_add_button).setVisible(false);
+        menu.findItem(R.id.bar_search_preferences).setVisible(false);
         return true;
     }
 
@@ -111,6 +118,14 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
+                return true;
+            case R.id.bar_logout:
+                SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preferences_file_key),Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.remove("logged_user").commit();
+                Intent i = new Intent(getApplicationContext(),LoginActivity.class);
+                startActivity(i);
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -314,5 +329,29 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         }
     }
 
+    class AddDialogListAdapter extends ArrayAdapter {
+        private ArrayList<Book> books;
+        private Context ctx;
 
+        public AddDialogListAdapter(Context context, int textViewResourceId, ArrayList<Book> items) {
+            super(context, textViewResourceId, items);
+            this.books = items;
+            this.ctx = context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            View v = convertView;
+            if (v == null) {
+                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                v = vi.inflate(R.layout.list_element, null);
+            }
+            Book b = books.get(position);
+            if (b != null) {
+
+            }
+
+            return v;
+        }
+    }
 }

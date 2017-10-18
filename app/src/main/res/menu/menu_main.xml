@@ -3,14 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="elapse.easyread.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/bar_logout"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Logout"
         app:showAsAction="never" />
     <item
         android:id="@+id/bar_add_button"
-        android:title="@string/action_settings"
-        android:icon="@mipmap/ic_launcher"
+        android:title="Add Exchange"
+        android:icon="@drawable/ic_add_exchange"
         app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/bar_search_preferences"
+        android:title="Search Preferences"
+        android:icon="@drawable/ic_search_preferences"
+        app:showAsAction="ifRoom"/>
+
 
 </menu>

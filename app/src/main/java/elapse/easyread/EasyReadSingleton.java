@@ -1,6 +1,8 @@
 package elapse.easyread;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.support.v4.util.LruCache;
 
@@ -8,6 +10,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.location.places.Place;
 
 /**
  * Created by Joshua on 2017-10-07.
@@ -17,8 +20,11 @@ public class EasyReadSingleton {
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
     private static Context mCtx;
-    private String userId = "admin";
 
+    //Variables for preferences
+    private String userId = "admin";
+    private String searchMaxDistance = "25";
+    private Place searchLocation;
     private static EasyReadSingleton INSTANCE ;
 
     private EasyReadSingleton(Context context) {
@@ -48,6 +54,12 @@ public class EasyReadSingleton {
         return INSTANCE;
 
     }
+
+    public static synchronized EasyReadSingleton getInstance() {
+        return INSTANCE;
+    }
+
+
     public RequestQueue getRequestQueue() {
         if (mRequestQueue == null) {
             mRequestQueue = Volley.newRequestQueue(mCtx.getApplicationContext());
@@ -67,6 +79,10 @@ public class EasyReadSingleton {
 
     public void setUserId(String id){userId=id;}
 
+    public String getSearchMaxDistance(){return searchMaxDistance;}
+    public void setSearchMaxDistance(String maxDistance){this.searchMaxDistance =maxDistance;}
 
+    public Place getSearchLocation(){return searchLocation;}
+    public void setSearchLocation(Place place){this.searchLocation = place;}
 
 }
