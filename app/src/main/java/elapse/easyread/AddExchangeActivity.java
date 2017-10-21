@@ -56,6 +56,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
     private NetworkImageView mImageView;
     private EditText mDescriptionView;
     private ProgressBar mProgressBar;
+    private EditText mIsbnView;
     PlaceAutocompleteFragment mAutocompleteFragment;
 
     private String currentImgURL;
@@ -75,7 +76,9 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         mImageView = (NetworkImageView) findViewById(R.id.add_exchange_image);
         mDescriptionView = (EditText) findViewById(R.id.add_exchange_description);
         mProgressBar = (ProgressBar) findViewById(R.id.add_exchange_progress);
+        mIsbnView = (EditText) findViewById(R.id.add_isbn_entry);
         mAutocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.pref_dialog_place_auto);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(toolbar != null) {
@@ -138,6 +141,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         mImageView.setImageUrl(currentImgURL,EasyReadSingleton.getInstance(getApplicationContext()).getImageLoader());
         mTitleView.setText(clickedBook.getTitle());
         mAuthorView.setText(clickedBook.getAuthor());
+        mIsbnView.setText(clickedBook.getIsbn());
 
     }
 
@@ -207,6 +211,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
                 String author = mAuthorView.getText().toString();
                 String imgUrl = currentImgURL;
                 String description = mDescriptionView.getText().toString();
+                String isbn = mIsbnView.getText().toString();
                 Place place = chosenPlace;
                 if(TextUtils.isEmpty(title)){
                     mTitleView.setError(getString(R.string.add_exch_required_field));
@@ -221,15 +226,23 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
                     Toast.makeText(getApplicationContext(),"Location required to add exchange",Toast.LENGTH_SHORT).show();
                     cancel = true;
                 }
+                else if(!TextUtils.isEmpty(isbn) && !isValidIsbn(isbn)){
+                    mIsbnView.setError("Invalid Isbn. Delete completely or enter valid isbn (no spaces)");
+                    cancel = true;
+                    focusView = mIsbnView;
+                }
                 if (cancel){
                     if(focusView !=null){
                         focusView.requestFocus();
                     }
                 }else{
                     showProgress(true);
-                    Book b = new Book(title,author,imgUrl);
+                    Book b = new Book(title,author,imgUrl,isbn);
                     if(TextUtils.isEmpty(description)){
                         description = "";
+                    }
+                    if (TextUtils.isEmpty(isbn)){
+                        isbn = "";
                     }
                     BookExchange newExchange = new BookExchange(b,EasyReadSingleton.getInstance(getApplicationContext()).getUserId(),
                                             place.getName().toString(),place.getLatLng(),description);
@@ -268,6 +281,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         mAuthorView.setText("");
         mImageView.setImageDrawable(null);
         mDescriptionView.setText("");
+        mIsbnView.setText("");
     }
 
     private ArrayList<Book> jsonRespToBookArray(JSONArray items){
@@ -293,15 +307,40 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
             JSONObject volInfo = info.getJSONObject("volumeInfo");
             String title = volInfo.getString("title");
             String author = volInfo.getJSONArray("authors").getString(0);
-            //String isbn10 = volInfo.getJSONArray("industryIdentifiers").getJSONObject(0).getString("identifier");
+            String isbn10 = volInfo.getJSONArray("industryIdentifiers").getJSONObject(0).getString("identifier");
             String imgUrl = volInfo.getJSONObject("imageLinks").getString("smallThumbnail");
-            return new Book(title,author,imgUrl);
+            return new Book(title,author,imgUrl,isbn10);
 
 
         }catch (JSONException e){
 
         }
         return null;
+    }
+    private boolean isValidIsbn(String isbn){
+        //TODO
+        return true;
+        /*
+        int sum = 0 ;
+        if(isbn.length() == 10){
+            String revIsbn = new StringBuilder(isbn).reverse().toString();
+            for (int i = 0; i<10;i++){
+                sum += i * Character.getNumericValue(revIsbn.charAt(i));
+            }
+            return (sum % 11) == 0;
+        } else if (isbn.length() == 13){
+            for(int i = 0;i < 10;i++){
+                if (i%2 == 0){
+                    sum+= Character.getNumericValue(isbn.charAt(i));
+                }else{
+                    sum+= Character.getNumericValue(isbn.charAt(i))*3;
+                }
+            }
+            return (10 - (sum %10)) ==
+            if ( Character.getNumericValue(isbn.charAt(12)) == 10 - (sum%10)) return true;
+        }
+        return false;
+        */
     }
 
     /**
@@ -329,29 +368,4 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         }
     }
 
-    class AddDialogListAdapter extends ArrayAdapter {
-        private ArrayList<Book> books;
-        private Context ctx;
-
-        public AddDialogListAdapter(Context context, int textViewResourceId, ArrayList<Book> items) {
-            super(context, textViewResourceId, items);
-            this.books = items;
-            this.ctx = context;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View v = convertView;
-            if (v == null) {
-                LayoutInflater vi = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                v = vi.inflate(R.layout.list_element, null);
-            }
-            Book b = books.get(position);
-            if (b != null) {
-
-            }
-
-            return v;
-        }
-    }
 }

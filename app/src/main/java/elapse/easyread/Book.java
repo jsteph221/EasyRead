@@ -17,17 +17,20 @@ public class Book implements Parcelable {
     private String title;
     private String author;
     private String imageUrl;
+    private String isbn; //isbn 10
 
-    public Book(String title, String author,String imageUrl){
+    public Book(String title, String author,String imageUrl,String isbn){
         this.title=title;
         this.author = author;
         this.imageUrl = imageUrl;
+        this.isbn = isbn;
     }
 
     public Book(JSONObject book){
         this.title = book.optString("title");
         this.author = book.optString("author");
         this.imageUrl = book.optString("imageUrl");
+        this.isbn = book.optString("isbn");
     }
 
 
@@ -35,6 +38,7 @@ public class Book implements Parcelable {
         title = source.readString();
         author = source.readString();
         imageUrl = source.readString();
+        isbn = source.readString();
     }
 
     public String getTitle(){
@@ -48,25 +52,16 @@ public class Book implements Parcelable {
     public String getImageUrl(){
         return imageUrl;
     }
+    public String getIsbn(){return isbn;}
 
     public JSONObject toJsonBook() throws JSONException{
         JSONObject b = new JSONObject();
         b.put("title",title);
         b.put("author",author);
         b.put("imageUrl",imageUrl);
+        b.put("isbn",isbn);
         return b;
     }
-
-    public static CharSequence[] toCharSequence(ArrayList<Book> books){
-        ArrayList<String> bookStrings = new ArrayList<>();
-        for (Book b : books){
-            String toAdd = b.getTitle()+" By "+ b.getAuthor();
-            bookStrings.add(toAdd);
-        }
-        return bookStrings.toArray(new CharSequence[bookStrings.size()]);
-    }
-
-
 
     @Override
     public int describeContents() {
@@ -78,6 +73,7 @@ public class Book implements Parcelable {
         dest.writeString(title);
         dest.writeString(author);
         dest.writeString(imageUrl);
+        dest.writeString(isbn);
     }
 
     public static final Creator<Book> CREATOR = new Creator<Book>() {
