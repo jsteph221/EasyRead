@@ -27,7 +27,6 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.android.volley.Request.Method.GET;
 import static com.android.volley.Request.Method.POST;
 
 /**
@@ -123,6 +122,7 @@ public class LoginActivity extends AppCompatActivity{
             try{
                 body.put("_id",username);
                 body.put("password",password);
+                body.put("firebaseToken",FirebaseIdService.getToken());
             }catch (JSONException e){
                 Log.d(TAG,e.toString());
             }
@@ -195,6 +195,7 @@ public class LoginActivity extends AppCompatActivity{
             try{
                 body.put("_id",username);
                 body.put("password",password);
+                body.put("firebaseTokens",FirebaseIdService.getToken());
             }catch (JSONException e){
                 Log.d(TAG,e.toString());
             }

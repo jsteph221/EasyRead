@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="1">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="47dp"
+            android:layout_height="wrap_content"
+            android:text="TO : "/>
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="enter username to send to"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Topic : " />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="enter topic"/>
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/messaging_messages"
+        android:layout_width="match_parent"
+        android:layout_height="318dp"
+        android:layout_weight="1.10"></ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
+        <EditText
+            android:id="@+id/messaging_send_data"
+            android:layout_width="wrap_content"
+            android:layout_height="93dp"
+            android:hint="enter new message"
+            android:layout_weight="1.03" />
+
+        <Button
+            android:id="@+id/messaging_send_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SEND" />
+
+    </LinearLayout>
+
+</LinearLayout>

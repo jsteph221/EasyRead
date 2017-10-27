@@ -14,18 +14,14 @@ import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -69,7 +65,7 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_add_exhange);
+        setContentView(R.layout.activity_add_exchange);
         mSearchInputView = (EditText) findViewById(R.id.search_input);
         mTitleView = (EditText) findViewById(R.id.add_exchange_title);
         mAuthorView = (EditText) findViewById(R.id.add_exchange_author);
