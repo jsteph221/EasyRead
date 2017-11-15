@@ -211,7 +211,10 @@ public class LoginActivity extends AppCompatActivity{
 
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    if(error.networkResponse.statusCode == 403){
+                    if(error.networkResponse == null){
+                        Toast.makeText(getApplicationContext(),R.string.network_error,Toast.LENGTH_LONG).show();
+                    }
+                    else if(error.networkResponse.statusCode == 403){
                         mUsernameView.setError("Username already in use");
                         mUsernameView.requestFocus();
                     }else{

@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "356323390768-6u77s1r6br4d59e2fg536049bg2k7l9f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "elapse.easyread",
+            "certificate_hash": "b0aee5b9ebd43f66221552ff792c40cc445ccbaa"
+          }
+        },
+        {
           "client_id": "356323390768-gspgq4ld7lteenrsa94qfpogtr4kt5kq.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

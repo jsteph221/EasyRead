@@ -1,18 +1,20 @@
 package elapse.easyread;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.TargetApi;
+
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -29,34 +32,56 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
+import static android.R.attr.bitmap;
 import static com.android.volley.Request.Method.POST;
-
+import static com.android.volley.Request.Method.PUT;
+/*
+    Activity for user adding a book exchange
+ */
 
 public class AddExchangeActivity extends AppCompatActivity implements PickBookDialog.NoticeDialogListener {
     private static final String TAG = "ADD_EXCHANGE_ACTIVITY";
+    private static final int IMAGE_REQUEST_CODE = 1;
 
+    //View variables
     private EditText mSearchInputView;
     private EditText mTitleView;
     private EditText mAuthorView;
-    private NetworkImageView mImageView;
+    private CustomNetworkImageView mImageView;
     private EditText mDescriptionView;
     private ProgressBar mProgressBar;
     private EditText mIsbnView;
     PlaceAutocompleteFragment mAutocompleteFragment;
+    private ImageButton mSearchButton;
+    private ImageButton mScanButton;
 
+
+
+    //State
     private String currentImgURL;
-    private Place chosenPlace;
+    private LatLng chosenLoc;
+    private String chosenLocName;
+    private boolean edit;
+    private BookExchange exchangeToEdit;
+    private Bitmap customImgBitmap;
+
 
 
 
@@ -69,25 +94,39 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         mSearchInputView = (EditText) findViewById(R.id.search_input);
         mTitleView = (EditText) findViewById(R.id.add_exchange_title);
         mAuthorView = (EditText) findViewById(R.id.add_exchange_author);
-        mImageView = (NetworkImageView) findViewById(R.id.add_exchange_image);
+        mImageView = (CustomNetworkImageView) findViewById(R.id.add_exchange_image);
         mDescriptionView = (EditText) findViewById(R.id.add_exchange_description);
-        mProgressBar = (ProgressBar) findViewById(R.id.add_exchange_progress);
+        mProgressBar = (ProgressBar) findViewById(R.id.progressSpinner);
         mIsbnView = (EditText) findViewById(R.id.add_isbn_entry);
         mAutocompleteFragment = (PlaceAutocompleteFragment)getFragmentManager().findFragmentById(R.id.pref_dialog_place_auto);
+        mSearchButton = (ImageButton) findViewById(R.id.search_button);
+        mScanButton = (ImageButton) findViewById(R.id.scan_button);
+        LatLng loc = EasyReadSingleton.getInstance(getApplicationContext()).getSearchLocationLatLng();
+        if(loc != null){
+            mAutocompleteFragment.setText("Use current location: ("+loc.latitude+","+loc.longitude);
+            chosenLoc = loc;
+            chosenLocName = loc.latitude + ","+loc.longitude;
+        }
+
+        //Check If this is adding an Exchange or Editing a preexisting one.
+        edit = getIntent().getBooleanExtra("edit",false);
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(toolbar != null) {
             setSupportActionBar(toolbar);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            if(edit){
+                toolbar.setTitle("Edit Exchange");
+            }
         }
 
-        EditText desc = (EditText) findViewById(R.id.add_exchange_description);
-        desc.setMovementMethod(new ScrollingMovementMethod());
+        mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
         mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
-                chosenPlace = place;
+                chosenLoc = place.getLatLng();
+                chosenLocName = place.getName().toString();
                 Log.i(TAG, "Place: " + place.getName());
             }
 
@@ -99,8 +138,32 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         });
 
         setupButtons();
+        if(edit){
+            TextView searchScanTitle = (TextView) findViewById(R.id.search_scan_title);
+            searchScanTitle.setVisibility(View.GONE);
+            mSearchInputView.setVisibility(View.GONE);
+            mSearchButton.setVisibility(View.GONE);
+            mScanButton.setVisibility(View.GONE);
+            exchangeToEdit = getIntent().getParcelableExtra("exchange");
+            currentImgURL = exchangeToEdit.getBook().getImageUrl();
+            populateViews(exchangeToEdit);
+        }
 
 
+    }
+
+    private void populateViews(BookExchange ex){
+        mImageView.setImageUrl(ex.getBook().getImageUrl(),EasyReadSingleton.getInstance(this).getImageLoader());
+        mTitleView.setText(ex.getBook().getTitle());
+        mAuthorView.setText(ex.getBook().getAuthor());
+        if(ex.getBook().getIsbn() != null){
+            mIsbnView.setText(ex.getBook().getIsbn());
+        }
+        chosenLocName = ex.getLocationName();
+        mAutocompleteFragment.setText(ex.getLocationName());
+        chosenLocName = ex.getLocationName();
+        chosenLoc = ex.getLatLng();
+        mDescriptionView.setText(ex.getDescription());
     }
 
     @Override
@@ -121,24 +184,30 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
             case R.id.bar_logout:
                 SharedPreferences sharedPref = getSharedPreferences(getString(R.string.preferences_file_key),Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPref.edit();
-                editor.remove("logged_user").commit();
+                editor.remove("logged_user").apply();
                 Intent i = new Intent(getApplicationContext(),LoginActivity.class);
                 startActivity(i);
                 finish();
+                return true;
+            case R.id.bar_messager:
+                Intent im = new Intent(AddExchangeActivity.this,MyMessengerActivity.class);
+                startActivity(im);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
+    //Function for dialog listener.Setup views with clicked book
     @Override
     public void onBookClick(DialogFragment dialog,Book clickedBook) {
         currentImgURL = clickedBook.getImageUrl();
         mImageView.setImageUrl(currentImgURL,EasyReadSingleton.getInstance(getApplicationContext()).getImageLoader());
         mTitleView.setText(clickedBook.getTitle());
+        mTitleView.setText(clickedBook.getTitle());
         mAuthorView.setText(clickedBook.getAuthor());
         mIsbnView.setText(clickedBook.getIsbn());
-
+        //Since bookimage chosed from google, make custom null.
+        customImgBitmap = null;
     }
 
 
@@ -197,6 +266,9 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         });
 
         Button addButton = (Button) findViewById(R.id.add_exchange_button);
+        if(edit){
+            addButton.setText("Edit Exchange");
+        }
         addButton.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
@@ -205,20 +277,18 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
 
                 String title = mTitleView.getText().toString();
                 String author = mAuthorView.getText().toString();
-                String imgUrl = currentImgURL;
                 String description = mDescriptionView.getText().toString();
                 String isbn = mIsbnView.getText().toString();
-                Place place = chosenPlace;
                 if(TextUtils.isEmpty(title)){
-                    mTitleView.setError(getString(R.string.add_exch_required_field));
+                    mTitleView.setError(getString(R.string.required_field));
                     cancel = true;
                     focusView = mTitleView;
                 }else if(TextUtils.isEmpty(author)){
-                    mTitleView.setError(getString(R.string.add_exch_required_field));
+                    mTitleView.setError(getString(R.string.required_field));
                     cancel = true;
                     focusView = mTitleView;
                 }
-                else if (chosenPlace == null){
+                else if (chosenLoc == null){
                     Toast.makeText(getApplicationContext(),"Location required to add exchange",Toast.LENGTH_SHORT).show();
                     cancel = true;
                 }
@@ -233,29 +303,118 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
                     }
                 }else{
                     showProgress(true);
-                    Book b = new Book(title,author,imgUrl,isbn);
                     if(TextUtils.isEmpty(description)){
                         description = "";
                     }
                     if (TextUtils.isEmpty(isbn)){
                         isbn = "";
                     }
-                    BookExchange newExchange = new BookExchange(b,EasyReadSingleton.getInstance(getApplicationContext()).getUserId(),
-                                            place.getName().toString(),place.getLatLng(),description);
-                    sendExchangeToServer(newExchange);
+                    //If image from google, create book with image
+                    if(currentImgURL != null){
+                        Book b = new Book(title,author,currentImgURL,isbn);
+                        BookExchange newExchange = new BookExchange(b,EasyReadSingleton.getInstance(getApplicationContext()).getUserId(),
+                                chosenLocName,chosenLoc,description);
+                        if(edit){
+                            sendEditToServer(newExchange);
+                        }else{
+                            sendExchangeToServer(newExchange);
+                        }
+                    }else{
+                        //Convert bitmap to base64 and create book.
+                        //Store image on backend, on callback store theexchange with the new url
+                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                        Book b = new Book(title,author,"",isbn);
+                        final BookExchange newExchange = new BookExchange(b,EasyReadSingleton.getInstance(getApplicationContext()).getUserId(),
+                                chosenLocName,chosenLoc,description);
+                        customImgBitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                        byte[] byteArray = byteArrayOutputStream .toByteArray();
+                        String image = Base64.encodeToString(byteArray, Base64.DEFAULT);
+                        JSONObject body = new JSONObject();
+                        try{
+                            body.put("base64Image",image);
+                        }catch (JSONException e){}
+                        String reqUrl = Config.API+"image";
 
+                        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,reqUrl, body,
+                                new Response.Listener<JSONObject>() {
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        newExchange.getBook().setImageUrl(Config.API+"image/"+response.optString("imageId"));
+                                        if(edit){
+                                            sendEditToServer(newExchange);
+                                        }else{
+                                            sendExchangeToServer(newExchange);
+                                        }
+                                    }
+                                },
+                                new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Log.e("VOLLEY", error.toString());
+                                        Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                                        showProgress(false);
+                                    }
+                                });
+                        EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
+                    }
                 }
 
         }});
+        Button mUploadImage = (Button) findViewById(R.id.add_exchange_upload);
+        mUploadImage.setOnClickListener(new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                startActivityForResult(i, IMAGE_REQUEST_CODE);
+            }
+        });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK){
+            currentImgURL = null;
+            customImgBitmap = (Bitmap) data.getExtras().get("data");
+            mImageView.setImageBitmap(customImgBitmap);
+        }
+
+    }
+
+
     private void sendExchangeToServer(BookExchange ex){
+
         String reqUrl = Config.API+"users/"+EasyReadSingleton.getInstance(getApplicationContext()).getUserId()+"/exchanges";
+
         JSONObject body= ex.toJsonBookExchange();
         JsonObjectRequest req = new JsonObjectRequest(POST, reqUrl,body, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 Toast.makeText(getApplicationContext(),"Added Exchange",Toast.LENGTH_LONG).show();
+               resetViews();
+                showProgress(false);
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                showProgress(false);
+            }
+        });
+        EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
+    }
+
+    private void sendEditToServer(BookExchange ex){
+        String reqUrl = Config.API+"exchanges/"+exchangeToEdit.getId();
+        if(customImgBitmap != null){
+            reqUrl += "/?customImage=true";
+        } 
+        JSONObject body = ex.toJsonBookExchange();
+        JsonObjectRequest req = new JsonObjectRequest(PUT,reqUrl,body,new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Toast.makeText(getApplicationContext(),"Exchange Edited",Toast.LENGTH_LONG).show();
                 resetViews();
                 showProgress(false);
             }
@@ -264,11 +423,17 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d(TAG,error.getMessage());
-                Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                if(error.networkResponse == null){
+                    Toast.makeText(getApplicationContext(),R.string.network_error,Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(getApplicationContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                }
                 showProgress(false);
             }
         });
         EasyReadSingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
+
+
     }
 
     private void resetViews(){
@@ -309,13 +474,12 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
 
 
         }catch (JSONException e){
-
+            Log.d(TAG,"Error parsing json response to book");
+            return null;
         }
-        return null;
     }
     private boolean isValidIsbn(String isbn){
-        //TODO
-        return true;
+        return (isbn.length()==13 || isbn.length()==10);
         /*
         int sum = 0 ;
         if(isbn.length() == 10){
@@ -339,29 +503,15 @@ public class AddExchangeActivity extends AppCompatActivity implements PickBookDi
         */
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+
     private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressBar.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        mIsbnView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mAuthorView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mTitleView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mDescriptionView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mImageView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
+        mSearchInputView.setVisibility(!show ? View.VISIBLE : View.INVISIBLE);
     }
 
 }

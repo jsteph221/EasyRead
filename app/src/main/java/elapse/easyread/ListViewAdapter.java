@@ -39,7 +39,7 @@ public class ListViewAdapter extends ArrayAdapter {
             TextView bookTitleText = (TextView) v.findViewById(R.id.list_book_title);
             TextView bookAuthorText = (TextView) v.findViewById(R.id.list_book_author);
             TextView posterNameText = (TextView) v.findViewById(R.id.list_poster_name);
-            NetworkImageView bookPicture = (NetworkImageView) v.findViewById(R.id.list_book_image);
+            CustomNetworkImageView bookPicture = (CustomNetworkImageView) v.findViewById(R.id.list_book_image);
             TextView exchangeDate = (TextView) v.findViewById(R.id.list_exchange_date);
             ImageButton goButton = (ImageButton) v.findViewById(R.id.list_go);
 

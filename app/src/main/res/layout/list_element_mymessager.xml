@@ -1,40 +1,52 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    >
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="2"
+        android:id="@+id/linearLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <TextView
+            android:paddingLeft="2dp"
             android:id="@+id/list_conv_username"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="TEST USERNAME"
             android:textColor="@color/colorPrimary"
             android:textSize="18sp"
             android:textStyle="bold" />
+
         <TextView
             android:id="@+id/list_conv_topic"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Topic"
+            android:layout_weight="1"
+            android:paddingLeft="2dp"
             android:textColor="@color/colorPrimary"
-            android:textSize="14sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
     </LinearLayout>
+
     <TextView
         android:id="@+id/list_conv_lastmessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxLines="1"/>
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/linearLayout"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="2dp"
+        android:textAlignment="center"
+        android:textColor="@color/colorBlack"
+        android:textSize="14sp"
+        android:textStyle="italic" />
 
-</LinearLayout>
+
+</RelativeLayout>

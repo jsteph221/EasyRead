@@ -13,10 +13,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * Created by Joshua on 2017-10-07.
+ * Object to hold book exchange
  */
 
 public class BookExchange implements Parcelable {
+    private String id;
     private String posterId;
     private Book book;
     private String locationName;
@@ -31,21 +32,23 @@ public class BookExchange implements Parcelable {
         this.latLng = latLng;
         this.description = desc;
     }
-
+    //Constructor from json response
     public BookExchange(JSONObject exchange){
         this.posterId = exchange.optString("posterId");
         this.locationName = exchange.optString("locationName");
         this.description = exchange.optString("description");
         JSONArray loc = exchange.optJSONArray("locationData");
         this.latLng = new LatLng(loc.optDouble(1),loc.optDouble(0));
-        this.date = exchange.optString("date");
+        this.date = exchange.optString("date").substring(0,10);
+        this.id = exchange.optString("_id");
         try{
             this.book = new Book(exchange.getJSONArray("book").getJSONObject(0));
         }catch(JSONException e){
             Log.d("Error: ",e.getMessage());
         }
     }
-
+    public String getId(){return id;}
+    public void setId(String id){this.id =id;}
     public BookExchange(Parcel  source){
         posterId = source.readString();
         book = source.readParcelable(Book.class.getClassLoader());
@@ -53,11 +56,16 @@ public class BookExchange implements Parcelable {
         latLng = source.readParcelable(LatLng.class.getClassLoader());
         description = source.readString();
         date = source.readString();
+        id = source.readString();
 }
 
     public String getPosterId(){
         return posterId;
     }
+    public String getDescription(){return description;}
+    public String getLocationName(){return locationName;}
+    public LatLng getLatLng(){return latLng;}
+
     public String getDate(){
         if(date != null) return date;
         return null;
@@ -98,6 +106,7 @@ public class BookExchange implements Parcelable {
         dest.writeParcelable(latLng,0);
         dest.writeString(description);
         dest.writeString(date);
+        dest.writeString(id);
     }
 
     public static final Creator<BookExchange> CREATOR = new Creator<BookExchange>() {

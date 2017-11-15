@@ -2,15 +2,13 @@ package elapse.easyread;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
 
 /**
- * Created by Joshua on 2017-10-09.
+ * Object for holding a information on a book
  */
 
 public class Book implements Parcelable {
@@ -26,6 +24,8 @@ public class Book implements Parcelable {
         this.isbn = isbn;
     }
 
+    //Constructor for JSON response from server
+
     public Book(JSONObject book){
         this.title = book.optString("title");
         this.author = book.optString("author");
@@ -33,8 +33,8 @@ public class Book implements Parcelable {
         this.isbn = book.optString("isbn");
     }
 
-
-    public Book(Parcel source) {
+    //Parcable for passing object through intent
+    private Book(Parcel source) {
         title = source.readString();
         author = source.readString();
         imageUrl = source.readString();
@@ -44,15 +44,16 @@ public class Book implements Parcelable {
     public String getTitle(){
         return title;
     }
-
     public String getAuthor(){
         return author;
     }
-
     public String getImageUrl(){
         return imageUrl;
     }
-    public String getIsbn(){return isbn;}
+    public String getIsbn(){return isbn != null ? isbn : "";}
+    public void setImageUrl(String url){this.imageUrl = url;}
+
+    //Creating JSONobject to send to server
 
     public JSONObject toJsonBook() throws JSONException{
         JSONObject b = new JSONObject();
@@ -63,6 +64,7 @@ public class Book implements Parcelable {
         return b;
     }
 
+    //Parcelable methods
     @Override
     public int describeContents() {
         return 0;

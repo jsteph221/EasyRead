@@ -2,6 +2,12 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorChatLight">#9c1e5dff</color>
+    <color name="colorChatDark">#b7ff0003</color>
+    <color name="colorAccent">#b7ff0003</color>
+    <color name="colorBlack">#000000</color>
+
+
+
     <color name="colorWhite">#FFFFFF</color>
 </resources>

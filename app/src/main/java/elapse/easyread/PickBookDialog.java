@@ -25,8 +25,8 @@ public class PickBookDialog extends DialogFragment {
         private Context ctx;
 
         public interface NoticeDialogListener {
-            public void onBookClick(DialogFragment dialog,Book clickedBook);
-        }
+        public void onBookClick(DialogFragment dialog,Book clickedBook);
+    }
         NoticeDialogListener mListener;
 
         @Override
@@ -80,7 +80,7 @@ public class PickBookDialog extends DialogFragment {
                     TextView mBookTitle = (TextView) v.findViewById(R.id.list_add_title);
                     TextView mBookAuthor = (TextView) v.findViewById(R.id.list_add_author);
                     TextView mBookIsbn = (TextView) v.findViewById(R.id.list_add_isbn);
-                    NetworkImageView mBookImg = (NetworkImageView) v.findViewById(R.id.list_add_image);
+                    CustomNetworkImageView mBookImg = (CustomNetworkImageView) v.findViewById(R.id.list_add_image);
                     if(mBookTitle != null){
                         mBookTitle.setText(b.getTitle());
                     }

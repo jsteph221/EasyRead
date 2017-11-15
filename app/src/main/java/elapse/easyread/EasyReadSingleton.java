@@ -11,9 +11,10 @@ import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.places.Place;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
- * Created by Joshua on 2017-10-07.
+ * Singleton to hold Volley http request queue and user preferences.
  */
 
 public class EasyReadSingleton {
@@ -24,12 +25,14 @@ public class EasyReadSingleton {
     //Variables for preferences
     private String userId = "admin";
     private String searchMaxDistance = "25";
-    private Place searchLocation;
+    private String searchLocationName;
+    private LatLng searchLocationLatLng;
     private static EasyReadSingleton INSTANCE ;
 
     private EasyReadSingleton(Context context) {
         mCtx = context;
         mRequestQueue = Volley.newRequestQueue(context);
+        //Imageloader for NetworkImageView
         mImageLoader = new ImageLoader(mRequestQueue,
                 new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap>
@@ -54,7 +57,7 @@ public class EasyReadSingleton {
         return INSTANCE;
 
     }
-
+    //Get instance for when ctx not required(eg no need for Volley)
     public static synchronized EasyReadSingleton getInstance() {
         return INSTANCE;
     }
@@ -82,7 +85,10 @@ public class EasyReadSingleton {
     public String getSearchMaxDistance(){return searchMaxDistance;}
     public void setSearchMaxDistance(String maxDistance){this.searchMaxDistance =maxDistance;}
 
-    public Place getSearchLocation(){return searchLocation;}
-    public void setSearchLocation(Place place){this.searchLocation = place;}
+    public String getSearchLocationName(){return searchLocationName;}
+    public void setSearchLocationName(String name){this.searchLocationName = name;}
+
+    public LatLng getSearchLocationLatLng(){return searchLocationLatLng;}
+    public void setSearchLocationLatLng(LatLng l){this.searchLocationLatLng = l;}
 
 }

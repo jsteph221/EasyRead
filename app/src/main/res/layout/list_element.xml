@@ -10,7 +10,7 @@
     android:descendantFocusability="blocksDescendants"
     >
 
-    <com.android.volley.toolbox.NetworkImageView
+    <elapse.easyread.CustomNetworkImageView
         android:id="@+id/list_book_image"
         android:layout_width="50dp"
         android:layout_height="75dp"
@@ -38,6 +38,7 @@
         android:id="@+id/list_book_title"
         android:layout_width="wrap_content"
         android:layout_height="25dp"
+        android:maxLines="1"
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/list_book_image"
         android:textStyle="bold" />
@@ -46,7 +47,9 @@
         android:id="@+id/list_book_author"
         android:layout_width="wrap_content"
         android:layout_height="25dp"
+        android:maxLines="1"
         android:layout_below="@+id/list_book_title"
+        android:layout_toLeftOf="@+id/list_go"
         android:layout_toEndOf="@+id/list_book_image"
          />
 
@@ -60,13 +63,12 @@
 
     <TextView
         android:id="@+id/list_exchange_date"
-        android:layout_width="wrap_content"
+        android:layout_width="75dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/list_book_image"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/list_go"
+        android:gravity="end"
         android:ems="10"
-        />
+        android:layout_below="@+id/list_go"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>

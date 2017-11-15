@@ -1,6 +1,7 @@
 package elapse.easyread;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 public class MyExchangesFragment extends Fragment {
     private ArrayList<BookExchange> exchanges;
     private View mView;
+    private ListView mListView;
+    private ListViewAdapter mAdapter;
 
     private boolean refreshOnResume= false;
     public MyExchangesFragment(){}
@@ -51,8 +54,7 @@ public class MyExchangesFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_my_exchanges, container, false);
         getExchanges();
-        return mView;
-    }
+        return mView;    }
 
 
     private void getExchanges(){
@@ -71,6 +73,7 @@ public class MyExchangesFragment extends Fragment {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast.makeText(getContext(),"Error contacting server",Toast.LENGTH_LONG).show();
+                        showProgress(false);
 
                     }
                 });
@@ -78,10 +81,10 @@ public class MyExchangesFragment extends Fragment {
     }
 
     private void setupListView() {
-        ListView listView = (ListView) mView.findViewById(R.id.my_exchanges_list);
-        ListViewAdapter adapter = new ListViewAdapter(this.getContext(), R.id.list_book_title, exchanges);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mListView = (ListView) mView.findViewById(R.id.my_exchanges_list);
+        mAdapter = new ListViewAdapter(this.getContext(), R.id.list_book_title, exchanges);
+        mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
@@ -90,21 +93,22 @@ public class MyExchangesFragment extends Fragment {
                 //TODO:Intent i = new Intent(this,ShowExchange.class);
             }
         });
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+        mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             //TODO
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view,
-                                           int position, long id) {
+                                           final int position, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                builder.setMessage("Choose Action").setItems(R.array.dialog_choose_action_myexchanges, new DialogInterface.OnClickListener() {
+
+                builder.setTitle("Choose Action").setItems(R.array.dialog_choose_action_myexchanges, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         switch (which){
                             case 0:
-                                //sendRemoveExchangeToServer(
+                                sendRemoveExchangeToServer(exchanges.get(position).getId(),position);
                                 Log.d("Dialog","delete exchange");
                                 break;
                             case 1:
-                                //edit
+                                editExchange(exchanges.get(position));
                                 break;
                             default:
                                 break;
@@ -123,9 +127,42 @@ public class MyExchangesFragment extends Fragment {
         });
         showProgress(false);
     }
-    private void showProgress(boolean bool){
-        ProgressBar bar = (ProgressBar) mView.findViewById(R.id.my_exchange_progress);
-        bar.setVisibility(bool ? View.VISIBLE : View.GONE);
+    private void showProgress(boolean show){
+        ProgressBar bar = (ProgressBar) mView.findViewById(R.id.progressSpinner);
+        bar.setVisibility(show ? View.VISIBLE : View.GONE);
+        if(mListView != null){
+            mListView.setVisibility(!show ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    private void sendRemoveExchangeToServer(String id, final int position){
+        String reqUrl = Config.API + "exchanges/"+id;
+        JsonObjectRequest req = new JsonObjectRequest
+                (Request.Method.DELETE, reqUrl, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Toast.makeText(getContext(),"Exchange Deleted",Toast.LENGTH_SHORT).show();
+                        exchanges.remove(position);
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }, new Response.ErrorListener() {
+
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+
+                    }
+                });
+        EasyReadSingleton.getInstance(this.getContext()).addToRequestQueue(req);
+
+    }
+
+    private void editExchange(BookExchange ex){
+        Intent i = new Intent(getContext(),AddExchangeActivity.class);
+        i.putExtra("edit",true);
+        i.putExtra("exchange",ex);
+        startActivity(i);
+
     }
 
     private ArrayList<BookExchange> parseJsonResponse(JSONObject response){

@@ -17,6 +17,8 @@
         android:title="Search Preferences"
         android:icon="@drawable/ic_search_preferences"
         app:showAsAction="ifRoom"/>
-
-
+    <item
+        android:id="@+id/bar_messager"
+        android:title="Messager"
+        app:showAsAction="never"/>
 </menu>

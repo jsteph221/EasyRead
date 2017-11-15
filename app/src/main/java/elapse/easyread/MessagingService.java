@@ -11,6 +11,10 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.json.JSONObject;
+
+import java.util.Map;
+
 import static android.content.ContentValues.TAG;
 
 public class MessagingService extends FirebaseMessagingService {
@@ -20,11 +24,16 @@ public class MessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
-        boolean cancel = false;
 
         // Check if message contains a data payload.
         if (remoteMessage.getData().size() > 0) {
             Log.d(TAG, "Message data payload: " + remoteMessage.getData());
+            Map resp = remoteMessage.getData();
+            String loggedUser = EasyReadSingleton.getInstance(getApplicationContext()).getUserId();
+            if (loggedUser != null && loggedUser == (String) resp.get("logged")){
+                sendMessageBroadcast((String) resp.get("from"),(String) resp.get("data"));
+                sendNotification(resp);
+            }
         }
 
         // Check if message contains a notification payload.
@@ -32,16 +41,14 @@ public class MessagingService extends FirebaseMessagingService {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
         }
 
-        // Also if you intend on generating your own notifications as a result of a received FCM
-        // message, here is where that should be initiated. See sendNotification method below.
     }
 
-    private void sendNotification(String messageBody){
+    private void sendNotification(Map msg){
         int notifyID = 1;
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.ic_add_exchange)
-                .setContentTitle("New Message")
-                .setContentText(messageBody);
+                .setContentTitle("New Message from : " + msg.get("user"))
+                .setContentText((String) msg.get("msg"));
         Intent resultIntent = new Intent(this, MainActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(MainActivity.class);
@@ -50,5 +57,13 @@ public class MessagingService extends FirebaseMessagingService {
         mBuilder.setContentIntent(resultPendingIntent);
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         mNotificationManager.notify(notifyID, mBuilder.build());
+    }
+
+    private final void sendMessageBroadcast(final String fromUser,final String data){
+        final Intent i = new Intent();
+        i.setAction("com.easyread.android.MESSAGE_RECIEVED");
+        i.putExtra("from_user",fromUser);
+        i.putExtra("data",data);
+        this.sendBroadcast(i);
     }
 }

@@ -10,27 +10,34 @@
             android:id="@+id/max_distance_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Maximum Distance for Search:  " />
+            android:text="Maximum Distance for Search:  "
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"/>
 
         <TextView
             android:id="@+id/max_distance_display"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:paddingStart="2dp"
+            android:paddingEnd="2dp"/>
     </LinearLayout>
 
     <SeekBar
         android:id="@+id/max_distance_seekbar"
-        android:layout_width="402dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:max="50"
         />
     <TextView
         android:id="@+id/location_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose Location to base search on" />
+        android:text="Choose Location to base search on"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp"/>
     <fragment
         android:id="@+id/pref_dialog_place_auto"
         android:layout_width="match_parent"

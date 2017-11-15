@@ -1,26 +1,33 @@
 package elapse.easyread;
 
+
+import android.app.DialogFragment;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.Toast;
+
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements SearchPreferencesDialog.NoticeDialogListener{
+    private static final String TAG = "Main Activity";
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -71,17 +78,37 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i2);
                 finish();
                 return true;
+            case R.id.bar_messager:
+                Intent im = new Intent(MainActivity.this,MyMessengerActivity.class);
+                startActivity(im);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
 
         }
     }
 
+
+    private void requestManualLocation(){
+        Toast.makeText(MainActivity.this,"Error your getting location. Please manually enter a location to search around here.",Toast.LENGTH_LONG).show();
+        SearchPreferencesDialog dialog = new SearchPreferencesDialog();
+        dialog.show(getFragmentManager(),"SearchPrefDialog");
+    }
+
+    @Override
+    public void onPreferenceChange(DialogFragment dialog, boolean newLocation) {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        Intent i = new Intent("TAG_REFRESH");
+
+        lbm.sendBroadcast(i);
+    }
+
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
 
@@ -92,7 +119,6 @@ public class MainActivity extends AppCompatActivity {
             mFragmentList.add(new MyExchangesFragment());
             mFragmentTitleList.add("My Exchanges");
         }
-
         @Override
         public Fragment getItem(int position) {
             return mFragmentList.get(position);

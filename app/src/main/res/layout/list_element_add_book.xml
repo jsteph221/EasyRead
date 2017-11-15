@@ -7,7 +7,7 @@
     android:orientation="horizontal"
     >
 
-    <com.android.volley.toolbox.NetworkImageView
+    <elapse.easyread.CustomNetworkImageView
         android:id="@+id/list_add_image"
         android:layout_width="50dp"
         android:layout_height="50dp"
