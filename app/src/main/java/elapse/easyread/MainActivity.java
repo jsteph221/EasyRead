@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity implements SearchPreferencesDialog.NoticeDialogListener{
+public class MainActivity extends AppCompatActivity implements SearchPreferencesDialog.NoticeDialogListener, SearchTermsDialog.NoticeSearchDialogListener{
     private static final String TAG = "Main Activity";
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -66,6 +66,10 @@ public class MainActivity extends AppCompatActivity implements SearchPreferences
                 SearchPreferencesDialog dialog = new SearchPreferencesDialog();
                 dialog.show(getFragmentManager(),"SearchPrefDialog");
                 return true;
+            case R.id.bar_search_terms:
+                SearchTermsDialog searchTermsDialog = new SearchTermsDialog();
+                searchTermsDialog.show(getFragmentManager(),"SearchTermDialog");
+                return true;
             case R.id.bar_add_button:
                 Intent i = new Intent(MainActivity.this, AddExchangeActivity.class);
                 startActivity(i);
@@ -99,7 +103,15 @@ public class MainActivity extends AppCompatActivity implements SearchPreferences
     public void onPreferenceChange(DialogFragment dialog, boolean newLocation) {
         LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
         Intent i = new Intent("TAG_REFRESH");
+        lbm.sendBroadcast(i);
+    }
 
+    @Override
+    public void onSearch(DialogFragment dialog, String searchTerms, String sort) {
+        LocalBroadcastManager lbm = LocalBroadcastManager.getInstance(this);
+        Intent i = new Intent("TAG_RFRESH");
+        i.putExtra("search_terms",searchTerms);
+        i.putExtra("sort_by",sort);
         lbm.sendBroadcast(i);
     }
 

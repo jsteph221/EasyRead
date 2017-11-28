@@ -11,11 +11,17 @@
         android:id="@+id/bar_add_button"
         android:title="Add Exchange"
         android:icon="@drawable/ic_add_exchange"
-        app:showAsAction="ifRoom" />
+        app:showAsAction="ifRoom"
+        />
     <item
         android:id="@+id/bar_search_preferences"
         android:title="Search Preferences"
         android:icon="@drawable/ic_search_preferences"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/bar_search_terms"
+        android:title="Search"
+        android:icon="@drawable/ic_search_terms"
         app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/bar_messager"

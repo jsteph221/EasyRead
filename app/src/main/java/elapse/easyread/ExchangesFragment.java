@@ -58,6 +58,7 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
 
     private ListViewAdapter mAdapter;
     private ListView mListView;
+    private TextView mErrorView;
 
     //Recives broadcasts from mainactivity when user changes maxDistance or manual location
     MyReceiver r;
@@ -76,8 +77,9 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
         exchanges = new ArrayList<>();
         mListView = (ListView) rootView.findViewById(R.id.exchanges_list);
         mAdapter = new ListViewAdapter(this.getContext(),R.id.list_book_title,exchanges);
+        mErrorView = (TextView) rootView.findViewById(R.id.error_text);
         mListView.setAdapter(mAdapter);
-        getExchanges();
+        getExchanges(null,null);
         return rootView;
     }
 
@@ -120,7 +122,7 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
                         Location loc = (Location) o;
                         CURRENT_LOCATION = new LatLng(loc.getLatitude(),loc.getLongitude());
                         EasyReadSingleton.getInstance(getContext()).setSearchLocationLatLng(CURRENT_LOCATION);
-                        getExchanges();
+                        getExchanges(null,null);
                     }
                 }
             });
@@ -137,7 +139,7 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
         Get Current location from singleton. If exists get exchanges from server.
         else call setuplocationservices.
      */
-    public void getExchanges(){
+    public void getExchanges(String searchTerms, String sort){
         CURRENT_LOCATION = EasyReadSingleton.getInstance(getContext()).getSearchLocationLatLng();
         if(CURRENT_LOCATION != null){
             String reqUrl = Config.API + "exchanges";
@@ -146,6 +148,13 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
             String latitude = Double.toString(CURRENT_LOCATION.latitude);
             String maxDistance = ins.getSearchMaxDistance();
             reqUrl += "/?longitude="+longitude+"&latitude="+latitude+"&maxDistance="+maxDistance+"&username="+EasyReadSingleton.getInstance(getActivity()).getUserId();
+            //Add queries if user defined search terms and sort parameter
+            if(searchTerms != null){
+                reqUrl+= "&search="+searchTerms.replaceAll(" ","+");
+            }
+            if(sort != null){
+                reqUrl+= "&sort="+sort;
+            }
             JsonObjectRequest req = new JsonObjectRequest
                     (Request.Method.GET, reqUrl, null, new Response.Listener<JSONObject>() {
                         @Override
@@ -158,6 +167,8 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Toast.makeText(getContext(),R.string.api_error,Toast.LENGTH_LONG).show();
+                            //mErrorView.setText("No exchanges in your area");
+                            //mErrorView.setText(View.VISIBLE);
 
                         }
                     });
@@ -168,8 +179,16 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
     }
     //Display exchanges
     private void setupListView(){
-        mAdapter.notifyDataSetChanged();
-        mListView.setVisibility(View.VISIBLE);
+        if(exchanges.size() == 0){
+            mErrorView.setText("There are no exchanges matching your search criteria.");
+            mErrorView.setText(View.VISIBLE);
+        }else{
+            if(mErrorView != null){
+                mErrorView.setVisibility(View.GONE);
+            }
+            mAdapter.notifyDataSetChanged();
+            mListView.setVisibility(View.VISIBLE);
+        }
     }
     //Populate exchanges with BookExchanges from server response
     private void parseJsonResponse(JSONObject response){
@@ -193,8 +212,8 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
     }
     //Display textview explaining location error. Request manual.
     private void setupLocationError(){
-        TextView mLocationErrorText = (TextView) getView().findViewById(R.id.location_error_text);
-        mLocationErrorText.setVisibility(View.VISIBLE);
+        mErrorView.setText("Error getting location. Please manually enter a location to search around by clicking the settings button on the menu.");
+        mErrorView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -214,7 +233,7 @@ public class ExchangesFragment extends Fragment implements GoogleApiClient.OnCon
     private class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            ExchangesFragment.this.getExchanges();
+            getExchanges(intent.getStringExtra("search_terms"),intent.getStringExtra("sort"));
         }
     }
 

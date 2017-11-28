@@ -22,7 +22,6 @@ import com.google.android.gms.maps.model.LatLng;
  */
 
 public class SearchPreferencesDialog extends DialogFragment {
-    private Context ctx;
 
     private String chosenPlaceName;
     private LatLng chosenPlaceLatLng;
@@ -108,7 +107,6 @@ public class SearchPreferencesDialog extends DialogFragment {
         super.onAttach(activity);
         // Verify that the host activity implements the callback interface
         try {
-            ctx = activity;
             // Instantiate the NoticeDialogListener so we can send events to the host
             mListener = (NoticeDialogListener) activity;
         } catch (ClassCastException e) {

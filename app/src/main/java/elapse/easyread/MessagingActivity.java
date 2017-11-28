@@ -111,6 +111,8 @@ public class MessagingActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu_main, menu);
         menu.findItem(R.id.bar_add_button).setVisible(false);
         menu.findItem(R.id.bar_search_preferences).setVisible(false);
+        menu.findItem(R.id.search_terms).setVisible(false);
+
         return true;
     }
 

@@ -25,4 +25,13 @@
         android:layout_centerVertical="true"
         android:visibility="gone" />
 
+    <TextView
+        android:id="@+id/error_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/progressSpinner"
+        android:text="TextView"
+        android:visibility="gone" />
+
 </RelativeLayout>

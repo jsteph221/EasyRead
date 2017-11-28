@@ -5,4 +5,10 @@
         <item>Delete Exchange</item>
         <item>Edit Exchange</item>
     </string-array>
+    <string-array name="sort_options">
+        <item>(Default)</item>
+        <item>Relevance</item>
+        <item>Date</item>
+        <item>Nearest</item>
+    </string-array>
 </resources>
